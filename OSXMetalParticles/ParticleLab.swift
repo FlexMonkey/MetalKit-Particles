@@ -65,7 +65,7 @@ class ParticleLab: MTKView
     
     var particleColor = ParticleColor(R: 1, G: 0.5, B: 0.2, A: 1)
     var dragFactor: Float = 0.97
-    var respawnOutOfBoundsParticles = false
+    var respawnOutOfBoundsParticles = true
     
     init(width: UInt, height: UInt, numParticles: ParticleCount)
     {
@@ -84,6 +84,8 @@ class ParticleLab: MTKView
         
         framebufferOnly = false
         colorPixelFormat = MTLPixelFormat.BGRA8Unorm
+        sampleCount = 4
+        
         drawableSize = CGSize(width: CGFloat(imageWidth), height: CGFloat(imageHeight));
         
         setUpParticles()
@@ -117,13 +119,13 @@ class ParticleLab: MTKView
     
     func resetGravityWells()
     {
-        setGravityWellProperties(gravityWell: .One, normalisedPositionX: 0.25, normalisedPositionY: 0.75, mass: 10, spin: 0)
-        setGravityWellProperties(gravityWell: .Two, normalisedPositionX: 0.25, normalisedPositionY: 0.25, mass: 10, spin: 0)
-        setGravityWellProperties(gravityWell: .Three, normalisedPositionX: 0.75, normalisedPositionY: 0.25, mass: 10, spin: 0)
-        setGravityWellProperties(gravityWell: .Four, normalisedPositionX: 0.75, normalisedPositionY: 0.75, mass: 10, spin: 0)
+        setGravityWellProperties(gravityWell: .One, normalisedPositionX: 0.25, normalisedPositionY: 0.75, mass: 10, spin: 0.2)
+        setGravityWellProperties(gravityWell: .Two, normalisedPositionX: 0.25, normalisedPositionY: 0.25, mass: 10, spin: -0.2)
+        setGravityWellProperties(gravityWell: .Three, normalisedPositionX: 0.75, normalisedPositionY: 0.25, mass: 10, spin: 0.2)
+        setGravityWellProperties(gravityWell: .Four, normalisedPositionX: 0.75, normalisedPositionY: 0.75, mass: 10, spin: -0.2)
     }
     
-    func resetParticles(edgesOnly: Bool = false)
+    func resetParticles(edgesOnly: Bool = true)
     {
         func rand() -> Float32
         {
