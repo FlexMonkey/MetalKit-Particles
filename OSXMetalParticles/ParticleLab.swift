@@ -57,8 +57,7 @@ class ParticleLab: MTKView
         C: Vector4(x: 0, y: 0, z: 0, w: 0),
         D: Vector4(x: 0, y: 0, z: 0, w: 0))
     
-    private var frameStartTime: CFAbsoluteTime!
-    private var frameNumber = 0
+    var metalReady : Bool = false
     let particleSize = sizeof(Particle)
     
     weak var particleLabDelegate: ParticleLabDelegate?
@@ -66,6 +65,10 @@ class ParticleLab: MTKView
     var particleColor = ParticleColor(R: 1, G: 0.5, B: 0.2, A: 1)
     var dragFactor: Float = 0.97
     var respawnOutOfBoundsParticles = true
+    
+    let fpsLabel = NSTextView(frame: NSRect(x: 0, y: 0, width: 200, height: 20))
+    private var frameStartTime: CFAbsoluteTime!
+    private var frameNumber = 0
     
     init(width: UInt, height: UInt, numParticles: ParticleCount)
     {
@@ -84,9 +87,15 @@ class ParticleLab: MTKView
         
         framebufferOnly = false
         colorPixelFormat = MTLPixelFormat.BGRA8Unorm
-        sampleCount = 4
+        sampleCount = 1
+        preferredFramesPerSecond = 60
         
         drawableSize = CGSize(width: CGFloat(imageWidth), height: CGFloat(imageHeight));
+        
+        fpsLabel.textColor = NSColor.whiteColor()
+        fpsLabel.editable = false
+        fpsLabel.drawsBackground = false
+        addSubview(fpsLabel)
         
         setUpParticles()
         
@@ -196,11 +205,9 @@ class ParticleLab: MTKView
     {
         if metalReady
         {
-step()
+            step()
         }
     }
-    
-    var metalReady : Bool = false
     
     private func setUpMetal()
     {
@@ -233,8 +240,6 @@ step()
             threadsPerThreadgroup = MTLSize(width:threadExecutionWidth,height:1,depth:1)
             threadgroupsPerGrid = MTLSize(width:particleCount / threadExecutionWidth, height:1, depth:1)
             
-            frameStartTime = CFAbsoluteTimeGetCurrent()
-            
             var imageWidthFloat = Float(imageWidth)
             var imageHeightFloat = Float(imageHeight)
             
@@ -242,7 +247,7 @@ step()
             
             imageHeightFloatBuffer = device!.newBufferWithBytes(&imageHeightFloat, length: sizeof(Float), options: MTLResourceOptions.CPUCacheModeDefaultCache)
             
-            
+            frameStartTime = CFAbsoluteTimeGetCurrent()
             metalReady = true
         }
     }
@@ -250,13 +255,12 @@ step()
     func step()
     {
         frameNumber++
-     
+        
         if frameNumber == 100
         {
             let frametime = (CFAbsoluteTimeGetCurrent() - frameStartTime) / 100
-            //print
-            
-            NSLog( String(1 / frametime)  )
+
+            dispatch_async(dispatch_get_main_queue(), {self.fpsLabel.string = "fps: \(Int(1 / frametime))"})
             
             frameStartTime = CFAbsoluteTimeGetCurrent()
             
@@ -289,8 +293,6 @@ step()
         let respawnOutOfBoundsParticlesBuffer = device!.newBufferWithBytes(&respawnOutOfBoundsParticles, length: sizeof(Bool), options: MTLResourceOptions.CPUCacheModeDefaultCache)
         commandEncoder.setBuffer(respawnOutOfBoundsParticlesBuffer, offset: 0, atIndex: 7)
         
-    
-        
         if let drawable = currentDrawable
         {
             drawable.texture.replaceRegion(self.region, mipmapLevel: 0, withBytes: blankBitmapRawData, bytesPerRow: Int(bytesPerRow))
@@ -302,13 +304,7 @@ step()
             
             commandBuffer.presentDrawable(drawable)
             
-            //commandBuffer.addCompletedHandler { _ in self.preStep() }
-            
             commandBuffer.commit()
-            
-            // commandBuffer.waitUntilScheduled()
-            
-            // drawable.present()
             
         }
         else
@@ -422,6 +418,7 @@ enum ParticleCount: Int
     case OneMillion =  262144
     case TwoMillion =  524288
     case FourMillion = 1048576
+    case EightMillion = 2097152
 }
 
 //  Paticles are split into three classes. The supplied particle color defines one

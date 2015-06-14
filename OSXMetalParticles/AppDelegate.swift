@@ -15,7 +15,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     
     func applicationDidFinishLaunching(aNotification: NSNotification) {
         
-        window.setContentSize(NSSize(width: 640, height: 480))
+        window.setContentSize(NSSize(width: 800, height: 600))
         
     }
 
