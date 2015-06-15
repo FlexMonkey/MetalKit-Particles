@@ -59,6 +59,9 @@ class ParticleLab: MTKView
     
     var metalReady : Bool = false
     let particleSize = sizeof(Particle)
+    let particleColorSize = sizeof(ParticleColor)
+    let boolSize = sizeof(Bool)
+    let floatSize = sizeof(Float)
     
     weak var particleLabDelegate: ParticleLabDelegate?
     
@@ -69,6 +72,8 @@ class ParticleLab: MTKView
     let fpsLabel = NSTextView(frame: NSRect(x: 0, y: 0, width: 200, height: 20))
     private var frameStartTime: CFAbsoluteTime!
     private var frameNumber = 0
+    
+    var particlesBufferNoCopy: MTLBuffer!
     
     init(width: UInt, height: UInt, numParticles: ParticleCount)
     {
@@ -100,6 +105,8 @@ class ParticleLab: MTKView
         setUpParticles()
         
         setUpMetal()
+        
+        particlesBufferNoCopy = device!.newBufferWithBytesNoCopy(particlesMemory, length: Int(particlesMemoryByteSize), options: MTLResourceOptions.StorageModePrivate, deallocator: nil)
     }
     
     required init?(coder aDecoder: NSCoder)
@@ -260,7 +267,7 @@ class ParticleLab: MTKView
         {
             let frametime = (CFAbsoluteTimeGetCurrent() - frameStartTime) / 100
 
-            dispatch_async(dispatch_get_main_queue(), {self.fpsLabel.string = "fps: \(Int(1 / frametime))"})
+            dispatch_async(dispatch_get_main_queue(), {self.fpsLabel.string = "\(Int(self.particleCount * 4)) particles at \(Int(1 / frametime)) fps"})
             
             frameStartTime = CFAbsoluteTimeGetCurrent()
             
@@ -271,27 +278,18 @@ class ParticleLab: MTKView
         let commandEncoder = commandBuffer.computeCommandEncoder()
         
         commandEncoder.setComputePipelineState(pipelineState)
-        
-        let particlesBufferNoCopy = device!.newBufferWithBytesNoCopy(particlesMemory, length: Int(particlesMemoryByteSize),
-            options: MTLResourceOptions.CPUCacheModeDefaultCache, deallocator: nil)
-        
+
         commandEncoder.setBuffer(particlesBufferNoCopy, offset: 0, atIndex: 0)
         commandEncoder.setBuffer(particlesBufferNoCopy, offset: 0, atIndex: 1)
         
-        let inGravityWell = device!.newBufferWithBytes(&gravityWellParticle, length: particleSize, options: MTLResourceOptions.CPUCacheModeDefaultCache)
-        commandEncoder.setBuffer(inGravityWell, offset: 0, atIndex: 2)
-        
-        let colorBuffer = device!.newBufferWithBytes(&particleColor, length: sizeof(ParticleColor), options: MTLResourceOptions.CPUCacheModeDefaultCache)
-        commandEncoder.setBuffer(colorBuffer, offset: 0, atIndex: 3)
+        commandEncoder.setBytes(&gravityWellParticle, length: particleSize, atIndex: 2)
+        commandEncoder.setBytes(&particleColor, length: particleColorSize, atIndex: 3)
         
         commandEncoder.setBuffer(imageWidthFloatBuffer, offset: 0, atIndex: 4)
         commandEncoder.setBuffer(imageHeightFloatBuffer, offset: 0, atIndex: 5)
         
-        let dragFactorBuffer = device!.newBufferWithBytes(&dragFactor, length: sizeof(Float), options: MTLResourceOptions.CPUCacheModeDefaultCache)
-        commandEncoder.setBuffer(dragFactorBuffer, offset: 0, atIndex: 6)
-        
-        let respawnOutOfBoundsParticlesBuffer = device!.newBufferWithBytes(&respawnOutOfBoundsParticles, length: sizeof(Bool), options: MTLResourceOptions.CPUCacheModeDefaultCache)
-        commandEncoder.setBuffer(respawnOutOfBoundsParticlesBuffer, offset: 0, atIndex: 7)
+        commandEncoder.setBytes(&dragFactor, length: floatSize, atIndex: 6)
+        commandEncoder.setBytes(&respawnOutOfBoundsParticles, length: boolSize, atIndex: 7)
         
         if let drawable = currentDrawable
         {
@@ -301,11 +299,10 @@ class ParticleLab: MTKView
             commandEncoder.dispatchThreadgroups(threadgroupsPerGrid, threadsPerThreadgroup: threadsPerThreadgroup)
             
             commandEncoder.endEncoding()
-            
+
             commandBuffer.presentDrawable(drawable)
             
             commandBuffer.commit()
-            
         }
         else
         {
@@ -419,6 +416,7 @@ enum ParticleCount: Int
     case TwoMillion =  524288
     case FourMillion = 1048576
     case EightMillion = 2097152
+    case SixteenMillion = 4194304
 }
 
 //  Paticles are split into three classes. The supplied particle color defines one
