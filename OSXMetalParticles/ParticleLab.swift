@@ -29,7 +29,7 @@ class ParticleLab: MTKView
     private var imageWidthFloatBuffer: MTLBuffer!
     private var imageHeightFloatBuffer: MTLBuffer!
     
-    let bytesPerRow: UInt
+    let bytesPerRow: Int
     let region: MTLRegion
     let blankBitmapRawData : [UInt8]
     
@@ -57,7 +57,6 @@ class ParticleLab: MTKView
         C: Vector4(x: 0, y: 0, z: 0, w: 0),
         D: Vector4(x: 0, y: 0, z: 0, w: 0))
     
-    var metalReady : Bool = false
     let particleSize = sizeof(Particle)
     let particleColorSize = sizeof(ParticleColor)
     let boolSize = sizeof(Bool)
@@ -82,7 +81,7 @@ class ParticleLab: MTKView
         imageWidth = width
         imageHeight = height
         
-        bytesPerRow = 4 * imageWidth
+        bytesPerRow = Int(4 * imageWidth)
         
         region = MTLRegionMake2D(0, 0, Int(imageWidth), Int(imageHeight))
         blankBitmapRawData = [UInt8](count: Int(imageWidth * imageHeight * 4), repeatedValue: 0)
@@ -118,8 +117,6 @@ class ParticleLab: MTKView
     {
         free(particlesMemory)
     }
-    
-    var showGravityWellPositions: Bool = false
     
     private func setUpParticles()
     {
@@ -210,10 +207,7 @@ class ParticleLab: MTKView
     
     override func drawRect(dirtyRect: NSRect)
     {
-        if metalReady
-        {
-            step()
-        }
+        step()
     }
     
     private func setUpMetal()
@@ -255,11 +249,10 @@ class ParticleLab: MTKView
             imageHeightFloatBuffer = device!.newBufferWithBytes(&imageHeightFloat, length: sizeof(Float), options: MTLResourceOptions.CPUCacheModeDefaultCache)
             
             frameStartTime = CFAbsoluteTimeGetCurrent()
-            metalReady = true
         }
     }
     
-    func step()
+    final private func step()
     {
         frameNumber++
         
@@ -267,7 +260,10 @@ class ParticleLab: MTKView
         {
             let frametime = (CFAbsoluteTimeGetCurrent() - frameStartTime) / 100
 
-            dispatch_async(dispatch_get_main_queue(), {self.fpsLabel.string = "\(Int(self.particleCount * 4)) particles at \(Int(1 / frametime)) fps"})
+            dispatch_async(dispatch_get_main_queue())
+            {
+                self.fpsLabel.string = "\(Int(self.particleCount * 4)) particles at \(Int(1 / frametime)) fps"
+            }
             
             frameStartTime = CFAbsoluteTimeGetCurrent()
             
@@ -293,7 +289,7 @@ class ParticleLab: MTKView
         
         if let drawable = currentDrawable
         {
-            drawable.texture.replaceRegion(self.region, mipmapLevel: 0, withBytes: blankBitmapRawData, bytesPerRow: Int(bytesPerRow))
+            drawable.texture.replaceRegion(self.region, mipmapLevel: 0, withBytes: blankBitmapRawData, bytesPerRow: bytesPerRow)
             commandEncoder.setTexture(drawable.texture, atIndex: 0)
             
             commandEncoder.dispatchThreadgroups(threadgroupsPerGrid, threadsPerThreadgroup: threadsPerThreadgroup)
@@ -311,7 +307,10 @@ class ParticleLab: MTKView
             print("metalLayer.nextDrawable() returned nil")
         }
         
-        particleLabDelegate?.particleLabDidUpdate()
+        dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0))
+        {
+            particleLabDelegate?.particleLabDidUpdate()
+        }
     }
     
 
