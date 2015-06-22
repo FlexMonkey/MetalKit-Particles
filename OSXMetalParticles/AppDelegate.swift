@@ -15,7 +15,11 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     
     func applicationDidFinishLaunching(aNotification: NSNotification) {
         
-        window.setContentSize(NSSize(width: 800, height: 600))
+        window.styleMask =  NSClosableWindowMask | NSTitledWindowMask | NSMiniaturizableWindowMask
+        window.setContentSize(NSSize(width: 1024, height: 768))
+        window.showsResizeIndicator = false
+        window.center()
+        window.title = "OS X Metal Particles"
         
     }
 
