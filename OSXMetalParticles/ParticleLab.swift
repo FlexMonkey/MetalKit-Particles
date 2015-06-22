@@ -20,6 +20,7 @@
 
 import Metal
 import MetalKit
+import GameplayKit
 
 class ParticleLab: MTKView
 {
@@ -138,7 +139,7 @@ class ParticleLab: MTKView
         setGravityWellProperties(gravityWell: .Four, normalisedPositionX: 0.75, normalisedPositionY: 0.75, mass: 10, spin: -0.2)
     }
     
-    func resetParticles(edgesOnly: Bool = true)
+    func resetParticles(edgesOnly: Bool = false, distribution: Distribution = Distribution.Gaussian)
     {
         func rand() -> Float32
         {
@@ -148,19 +149,35 @@ class ParticleLab: MTKView
         let imageWidthDouble = Double(imageWidth)
         let imageHeightDouble = Double(imageHeight)
         
+        let randomSource = GKRandomSource()
+        
+        let randomWidth: GKRandomDistribution
+        let randomHeight: GKRandomDistribution
+        
+        switch distribution
+        {
+        case .Gaussian:
+            randomWidth = GKGaussianDistribution(randomSource: randomSource, lowestValue: 0, highestValue: Int(imageWidthDouble))
+            randomHeight = GKGaussianDistribution(randomSource: randomSource, lowestValue: 0, highestValue: Int(imageHeightDouble))
+            
+        case .Uniform:
+            randomWidth = GKShuffledDistribution(randomSource: randomSource, lowestValue: 0, highestValue: Int(imageWidthDouble))
+            randomHeight = GKShuffledDistribution(randomSource: randomSource, lowestValue: 0, highestValue: Int(imageHeightDouble))
+        }
+        
         for index in particlesParticleBufferPtr.startIndex ..< particlesParticleBufferPtr.endIndex
         {
-            var positionAX = Float(drand48() * imageWidthDouble)
-            var positionAY = Float(drand48() * imageHeightDouble)
+            var positionAX = Float(randomWidth.nextInt())
+            var positionAY = Float(randomHeight.nextInt())
             
-            var positionBX = Float(drand48() * imageWidthDouble)
-            var positionBY = Float(drand48() * imageHeightDouble)
+            var positionBX = Float(randomWidth.nextInt())
+            var positionBY = Float(randomHeight.nextInt())
             
-            var positionCX = Float(drand48() * imageWidthDouble)
-            var positionCY = Float(drand48() * imageHeightDouble)
+            var positionCX = Float(randomWidth.nextInt())
+            var positionCY = Float(randomHeight.nextInt())
             
-            var positionDX = Float(drand48() * imageWidthDouble)
-            var positionDY = Float(drand48() * imageHeightDouble)
+            var positionDX = Float(randomWidth.nextInt())
+            var positionDY = Float(randomHeight.nextInt())
             
             if edgesOnly
             {
@@ -396,6 +413,12 @@ protocol ParticleLabDelegate: NSObjectProtocol
 {
     func particleLabDidUpdate()
     func particleLabMetalUnavailable()
+}
+
+enum Distribution
+{
+    case Gaussian
+    case Uniform
 }
 
 enum GravityWell
