@@ -9,9 +9,19 @@
 			<key>orderHint</key>
 			<integer>0</integer>
 		</dict>
+		<key>iOSMetalParticles.xcscheme</key>
+		<dict>
+			<key>orderHint</key>
+			<integer>1</integer>
+		</dict>
 	</dict>
 	<key>SuppressBuildableAutocreation</key>
 	<dict>
+		<key>3E2B16F21B39CB9600DE1454</key>
+		<dict>
+			<key>primary</key>
+			<true/>
+		</dict>
 		<key>3EE448D01B2B857E003F8471</key>
 		<dict>
 			<key>primary</key>

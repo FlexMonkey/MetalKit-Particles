@@ -21,6 +21,7 @@
 import Metal
 import MetalKit
 import GameplayKit
+// import MetalPerformanceShaders
 
 class ParticleLab: MTKView
 {
@@ -69,7 +70,6 @@ class ParticleLab: MTKView
     var dragFactor: Float = 0.97
     var respawnOutOfBoundsParticles = true
     
-    let fpsLabel = NSTextView(frame: NSRect(x: 0, y: 0, width: 200, height: 20))
     private var frameStartTime: CFAbsoluteTime!
     private var frameNumber = 0
     
@@ -96,20 +96,15 @@ class ParticleLab: MTKView
         preferredFramesPerSecond = 60
         
         drawableSize = CGSize(width: CGFloat(imageWidth), height: CGFloat(imageHeight));
-        
-        fpsLabel.textColor = NSColor.whiteColor()
-        fpsLabel.editable = false
-        fpsLabel.drawsBackground = false
-        addSubview(fpsLabel)
-        
+       
         setUpParticles()
         
         setUpMetal()
         
-        particlesBufferNoCopy = device!.newBufferWithBytesNoCopy(particlesMemory, length: Int(particlesMemoryByteSize), options: MTLResourceOptions.StorageModePrivate, deallocator: nil)
+        particlesBufferNoCopy = device!.newBufferWithBytesNoCopy(particlesMemory, length: Int(particlesMemoryByteSize), options: MTLResourceOptions.StorageModeShared, deallocator: nil)
     }
     
-    required init?(coder aDecoder: NSCoder)
+    required init(coder aDecoder: NSCoder)
     {
         fatalError("init(coder:) has not been implemented")
     }
@@ -222,7 +217,8 @@ class ParticleLab: MTKView
         }
     }
     
-    override func drawRect(dirtyRect: NSRect)
+
+    override func drawRect(dirtyRect: CGRect)
     {
         step()
     }
@@ -269,6 +265,13 @@ class ParticleLab: MTKView
         }
     }
     
+    private var _status = "N/A"
+    
+    var status:String
+    {
+        return _status
+    }
+    
     final private func step()
     {
         frameNumber++
@@ -277,10 +280,7 @@ class ParticleLab: MTKView
         {
             let frametime = (CFAbsoluteTimeGetCurrent() - frameStartTime) / 100
 
-            dispatch_async(dispatch_get_main_queue())
-            {
-                self.fpsLabel.string = "\(Int(self.particleCount * 4)) particles at \(Int(1 / frametime)) fps"
-            }
+            _status = "\(Int(self.particleCount * 4)) particles at \(Int(1 / frametime)) fps"
             
             frameStartTime = CFAbsoluteTimeGetCurrent()
             

@@ -15,17 +15,24 @@ class GameViewController : NSViewController, ParticleLabDelegate
     var particleLab: ParticleLab!
     let floatPi = Float(M_PI)
     
+    let fpsLabel = NSTextView(frame: NSRect(x: 0, y: 0, width: 200, height: 20))
+    
     override func viewDidLoad()
     {        
         super.viewDidLoad()
         
-        particleLab = ParticleLab(width: 1024, height: 768, numParticles: ParticleCount.FourMillion)
+        particleLab = ParticleLab(width: 1024, height: 768, numParticles: ParticleCount.EightMillion)
         
         particleLab.dragFactor = 0.85
         particleLab.respawnOutOfBoundsParticles = true
         particleLab.particleLabDelegate = self
         
         view.addSubview(particleLab)
+        
+        fpsLabel.textColor = NSColor.whiteColor()
+        fpsLabel.editable = false
+        fpsLabel.drawsBackground = false
+        view.addSubview(fpsLabel)
     }
 
     func particleLabMetalUnavailable()
@@ -35,6 +42,12 @@ class GameViewController : NSViewController, ParticleLabDelegate
     
     func particleLabDidUpdate()
     {
+        /*
+        dispatch_async(dispatch_get_main_queue())
+        {
+            self.fpsLabel.string = self.particleLab.status
+        }
+        */
         cloudChamberStep()
     }
     
