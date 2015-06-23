@@ -21,7 +21,7 @@ class GameViewController : NSViewController, ParticleLabDelegate
     {        
         super.viewDidLoad()
         
-        particleLab = ParticleLab(width: 1024, height: 768, numParticles: ParticleCount.EightMillion)
+        particleLab = ParticleLab(width: 1024, height: 768, numParticles: ParticleCount.FourMillion)
         
         particleLab.dragFactor = 0.85
         particleLab.respawnOutOfBoundsParticles = true
