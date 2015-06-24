@@ -10,7 +10,7 @@ import UIKit
 
 class ViewController: UIViewController, ParticleLabDelegate
 {
-
+    
     var gravityWellAngle: Float = 0
     var particleLab: ParticleLab!
     let floatPi = Float(M_PI)
@@ -27,7 +27,7 @@ class ViewController: UIViewController, ParticleLabDelegate
         
         view.addSubview(particleLab)
     }
-
+    
     func particleLabMetalUnavailable()
     {
         // handle metal unavailable here
@@ -36,8 +36,8 @@ class ViewController: UIViewController, ParticleLabDelegate
     func particleLabStatisticsDidUpdate(fps fps: Int, description: String)
     {
         dispatch_async(dispatch_get_main_queue())
-        {
-            // self.fpsLabel.string = description
+            {
+                // self.fpsLabel.string = description
         }
     }
     
@@ -74,11 +74,11 @@ class ViewController: UIViewController, ParticleLabDelegate
             mass: 26 * cos(gravityWellAngle / 1.5),
             spin: -19 * sin(gravityWellAngle * 1.5))
     }
-
+    
     override func viewDidLayoutSubviews()
     {
         particleLab.frame = view.bounds
     }
-
+    
 }
 

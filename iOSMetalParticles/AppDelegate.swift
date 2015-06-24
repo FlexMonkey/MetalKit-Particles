@@ -2,7 +2,7 @@
 //  AppDelegate.swift
 //  iOSMetalParticles
 //
-//  Created by Simon Gladman on 23/06/2015.
+//  Created by Simon Gladman on 24/06/2015.
 //  Copyright © 2015 Simon Gladman. All rights reserved.
 //
 
