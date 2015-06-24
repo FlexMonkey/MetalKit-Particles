@@ -1,24 +1,22 @@
 //
-//  GameViewController.swift
-//  OSXMetalParticles
+//  ViewController.swift
+//  iOSMetalParticles
 //
-//  Created by Simon Gladman on 12/06/2015.
-//  Copyright (c) 2015 Simon Gladman. All rights reserved.
+//  Created by Simon Gladman on 23/06/2015.
+//  Copyright © 2015 Simon Gladman. All rights reserved.
 //
 
-import Cocoa
+import UIKit
 
-
-class GameViewController : NSViewController, ParticleLabDelegate
+class ViewController: UIViewController, ParticleLabDelegate
 {
+
     var gravityWellAngle: Float = 0
     var particleLab: ParticleLab!
     let floatPi = Float(M_PI)
     
-    let fpsLabel = NSTextView(frame: NSRect(x: 0, y: 0, width: 200, height: 20))
-    
     override func viewDidLoad()
-    {        
+    {
         super.viewDidLoad()
         
         particleLab = ParticleLab(width: 1024, height: 768, numParticles: ParticleCount.FourMillion)
@@ -28,11 +26,6 @@ class GameViewController : NSViewController, ParticleLabDelegate
         particleLab.particleLabDelegate = self
         
         view.addSubview(particleLab)
-        
-        fpsLabel.textColor = NSColor.whiteColor()
-        fpsLabel.editable = false
-        fpsLabel.drawsBackground = false
-        view.addSubview(fpsLabel)
     }
 
     func particleLabMetalUnavailable()
@@ -44,18 +37,12 @@ class GameViewController : NSViewController, ParticleLabDelegate
     {
         dispatch_async(dispatch_get_main_queue())
         {
-            self.fpsLabel.string = description
+            // self.fpsLabel.string = description
         }
     }
     
     func particleLabDidUpdate()
     {
-        /*
-        dispatch_async(dispatch_get_main_queue())
-        {
-            self.fpsLabel.string = self.particleLab.status
-        }
-        */
         cloudChamberStep()
     }
     
@@ -87,7 +74,11 @@ class GameViewController : NSViewController, ParticleLabDelegate
             mass: 26 * cos(gravityWellAngle / 1.5),
             spin: -19 * sin(gravityWellAngle * 1.5))
     }
-    
-    
-    
+
+    override func viewDidLayoutSubviews()
+    {
+        particleLab.frame = view.bounds
+    }
+
 }
+

@@ -265,13 +265,6 @@ class ParticleLab: MTKView
         }
     }
     
-    private var _status = "N/A"
-    
-    var status:String
-    {
-        return _status
-    }
-    
     final private func step()
     {
         frameNumber++
@@ -280,7 +273,9 @@ class ParticleLab: MTKView
         {
             let frametime = (CFAbsoluteTimeGetCurrent() - frameStartTime) / 100
 
-            _status = "\(Int(self.particleCount * 4)) particles at \(Int(1 / frametime)) fps"
+            let description = "\(Int(self.particleCount * 4)) particles at \(Int(1 / frametime)) fps"
+            
+            particleLabDelegate?.particleLabStatisticsDidUpdate(fps: Int(1 / frametime), description: description)
             
             frameStartTime = CFAbsoluteTimeGetCurrent()
             
@@ -413,6 +408,8 @@ protocol ParticleLabDelegate: NSObjectProtocol
 {
     func particleLabDidUpdate()
     func particleLabMetalUnavailable()
+    
+    func particleLabStatisticsDidUpdate(fps fps: Int, description: String)
 }
 
 enum Distribution

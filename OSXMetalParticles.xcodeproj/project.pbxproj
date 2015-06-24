@@ -20,6 +20,12 @@
 		3EE448DB1B2B857E003F8471 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 3EE448DA1B2B857E003F8471 /* Assets.xcassets */; };
 		3EE448DE1B2B857E003F8471 /* MainMenu.xib in Resources */ = {isa = PBXBuildFile; fileRef = 3EE448DC1B2B857E003F8471 /* MainMenu.xib */; };
 		3EF103111B39FB39006E13CE /* Shaders.metal in Sources */ = {isa = PBXBuildFile; fileRef = 3EE448D81B2B857E003F8471 /* Shaders.metal */; };
+		3EF1031B1B3A86C6006E13CE /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3EF103131B3A86C6006E13CE /* AppDelegate.swift */; };
+		3EF1031C1B3A86C6006E13CE /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 3EF103141B3A86C6006E13CE /* Assets.xcassets */; };
+		3EF1031D1B3A86C6006E13CE /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 3EF103151B3A86C6006E13CE /* LaunchScreen.storyboard */; };
+		3EF1031E1B3A86C6006E13CE /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 3EF103171B3A86C6006E13CE /* Main.storyboard */; };
+		3EF1031F1B3A86C6006E13CE /* Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 3EF103191B3A86C6006E13CE /* Info.plist */; };
+		3EF103201B3A86C6006E13CE /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3EF1031A1B3A86C6006E13CE /* ViewController.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -38,6 +44,12 @@
 		3EE448DA1B2B857E003F8471 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		3EE448DD1B2B857E003F8471 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = Base; path = Base.lproj/MainMenu.xib; sourceTree = "<group>"; };
 		3EE448DF1B2B857E003F8471 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		3EF103131B3A86C6006E13CE /* AppDelegate.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
+		3EF103141B3A86C6006E13CE /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		3EF103161B3A86C6006E13CE /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
+		3EF103181B3A86C6006E13CE /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
+		3EF103191B3A86C6006E13CE /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		3EF1031A1B3A86C6006E13CE /* ViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -103,12 +115,26 @@
 				3E2B16EE1B39CAD300DE1454 /* particleLab */,
 				3EE448D41B2B857E003F8471 /* AppDelegate.swift */,
 				3EE448D61B2B857E003F8471 /* GameViewController.swift */,
+				3EF103121B3A86C6006E13CE /* iOSMetalParticles */,
 				3EE448D81B2B857E003F8471 /* Shaders.metal */,
 				3EE448DA1B2B857E003F8471 /* Assets.xcassets */,
 				3EE448DC1B2B857E003F8471 /* MainMenu.xib */,
 				3EE448DF1B2B857E003F8471 /* Info.plist */,
 			);
 			path = OSXMetalParticles;
+			sourceTree = "<group>";
+		};
+		3EF103121B3A86C6006E13CE /* iOSMetalParticles */ = {
+			isa = PBXGroup;
+			children = (
+				3EF103131B3A86C6006E13CE /* AppDelegate.swift */,
+				3EF103141B3A86C6006E13CE /* Assets.xcassets */,
+				3EF103151B3A86C6006E13CE /* LaunchScreen.storyboard */,
+				3EF103171B3A86C6006E13CE /* Main.storyboard */,
+				3EF103191B3A86C6006E13CE /* Info.plist */,
+				3EF1031A1B3A86C6006E13CE /* ViewController.swift */,
+			);
+			path = iOSMetalParticles;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -200,6 +226,10 @@
 			buildActionMask = 2147483647;
 			files = (
 				3EE448DB1B2B857E003F8471 /* Assets.xcassets in Resources */,
+				3EF1031E1B3A86C6006E13CE /* Main.storyboard in Resources */,
+				3EF1031F1B3A86C6006E13CE /* Info.plist in Resources */,
+				3EF1031D1B3A86C6006E13CE /* LaunchScreen.storyboard in Resources */,
+				3EF1031C1B3A86C6006E13CE /* Assets.xcassets in Resources */,
 				3EE448DE1B2B857E003F8471 /* MainMenu.xib in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -222,9 +252,11 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				3EF103201B3A86C6006E13CE /* ViewController.swift in Sources */,
 				3EE448D91B2B857E003F8471 /* Shaders.metal in Sources */,
 				3EE448D71B2B857E003F8471 /* GameViewController.swift in Sources */,
 				3EE448D51B2B857E003F8471 /* AppDelegate.swift in Sources */,
+				3EF1031B1B3A86C6006E13CE /* AppDelegate.swift in Sources */,
 				3E78718A1B2B86990007F15B /* ParticleLab.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -254,6 +286,22 @@
 				3EE448DD1B2B857E003F8471 /* Base */,
 			);
 			name = MainMenu.xib;
+			sourceTree = "<group>";
+		};
+		3EF103151B3A86C6006E13CE /* LaunchScreen.storyboard */ = {
+			isa = PBXVariantGroup;
+			children = (
+				3EF103161B3A86C6006E13CE /* Base */,
+			);
+			name = LaunchScreen.storyboard;
+			sourceTree = "<group>";
+		};
+		3EF103171B3A86C6006E13CE /* Main.storyboard */ = {
+			isa = PBXVariantGroup;
+			children = (
+				3EF103181B3A86C6006E13CE /* Base */,
+			);
+			name = Main.storyboard;
 			sourceTree = "<group>";
 		};
 /* End PBXVariantGroup section */

@@ -20,7 +20,6 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         window.showsResizeIndicator = false
         window.center()
         window.title = "OS X Metal Particles"
-        
     }
 
     func applicationWillTerminate(aNotification: NSNotification) {
