@@ -23,7 +23,6 @@ class ViewController: UIViewController, ParticleLabDelegate
         
         particleLab = ParticleLab(width: 1024, height: 768, numParticles: ParticleCount.FourMillion)
         
-        particleLab.clearOnStep = false
         particleLab.dragFactor = 0.85
         particleLab.respawnOutOfBoundsParticles = true
         particleLab.particleLabDelegate = self

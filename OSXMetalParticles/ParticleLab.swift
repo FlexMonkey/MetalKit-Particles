@@ -21,7 +21,6 @@
 import Metal
 import MetalKit
 import GameplayKit
-// import MetalPerformanceShaders
 
 class ParticleLab: MTKView
 {
