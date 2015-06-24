@@ -69,6 +69,7 @@ class ParticleLab: MTKView
     var particleColor = ParticleColor(R: 1, G: 0.5, B: 0.2, A: 1)
     var dragFactor: Float = 0.97
     var respawnOutOfBoundsParticles = true
+    var clearOnStep = true
     
     private var frameStartTime: CFAbsoluteTime!
     private var frameNumber = 0
@@ -301,7 +302,11 @@ class ParticleLab: MTKView
         
         if let drawable = currentDrawable
         {
-            drawable.texture.replaceRegion(self.region, mipmapLevel: 0, withBytes: blankBitmapRawData, bytesPerRow: bytesPerRow)
+            if clearOnStep
+            {
+                drawable.texture.replaceRegion(self.region, mipmapLevel: 0, withBytes: blankBitmapRawData, bytesPerRow: bytesPerRow)
+            }
+            
             commandEncoder.setTexture(drawable.texture, atIndex: 0)
             
             commandEncoder.dispatchThreadgroups(threadgroupsPerGrid, threadsPerThreadgroup: threadsPerThreadgroup)
