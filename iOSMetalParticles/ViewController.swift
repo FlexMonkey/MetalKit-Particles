@@ -15,14 +15,15 @@ class ViewController: UIViewController, ParticleLabDelegate
     var particleLab: ParticleLab!
     let floatPi = Float(M_PI)
     
-    let fpsLabel = UILabel(frame: CGRect(x: 0, y: 0, width: 200, height: 20))
+    let fpsLabel = UILabel(frame: CGRect(x: 0, y: 20, width: 400, height: 20))
     
     override func viewDidLoad()
     {
         super.viewDidLoad()
         
-        particleLab = ParticleLab(width: 1024, height: 768, numParticles: ParticleCount.FourMillion)
+        particleLab = ParticleLab(width: UInt(view.frame.width * 2), height: UInt(view.frame.height * 2), numParticles: ParticleCount.FourMillion)
         
+        particleLab.clearOnStep = false
         particleLab.dragFactor = 0.85
         particleLab.respawnOutOfBoundsParticles = true
         particleLab.particleLabDelegate = self
@@ -30,7 +31,7 @@ class ViewController: UIViewController, ParticleLabDelegate
         view.addSubview(particleLab)
         
         fpsLabel.textColor = UIColor.whiteColor()
-        view.addSubview(fpsLabel)
+//        view.addSubview(fpsLabel)
     }
     
     func particleLabMetalUnavailable()
@@ -40,10 +41,10 @@ class ViewController: UIViewController, ParticleLabDelegate
     
     func particleLabStatisticsDidUpdate(fps fps: Int, description: String)
     {
-        dispatch_async(dispatch_get_main_queue())
-        {
-            self.fpsLabel.text = description
-        }
+//        dispatch_async(dispatch_get_main_queue())
+//        {
+//            self.fpsLabel.text = description
+//        }
     }
     
     func particleLabDidUpdate()

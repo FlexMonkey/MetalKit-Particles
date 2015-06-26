@@ -21,6 +21,7 @@
 import Metal
 import MetalKit
 import GameplayKit
+import MetalPerformanceShaders
 
 class ParticleLab: MTKView
 {
@@ -65,7 +66,7 @@ class ParticleLab: MTKView
     
     weak var particleLabDelegate: ParticleLabDelegate?
     
-    var particleColor = ParticleColor(R: 1, G: 0.5, B: 0.2, A: 1)
+    var particleColor = ParticleColor(R: 1, G: 0.15, B: 0.15, A: 1)
     var dragFactor: Float = 0.97
     var respawnOutOfBoundsParticles = true
     var clearOnStep = true
@@ -74,6 +75,8 @@ class ParticleLab: MTKView
     private var frameNumber = 0
     
     var particlesBufferNoCopy: MTLBuffer!
+    
+    var blur: MPSImageGaussianBlur!
     
     init(width: UInt, height: UInt, numParticles: ParticleCount)
     {
@@ -100,6 +103,7 @@ class ParticleLab: MTKView
         setUpParticles()
         
         setUpMetal()
+        setUpTextures()
         
         particlesBufferNoCopy = device!.newBufferWithBytesNoCopy(particlesMemory, length: Int(particlesMemoryByteSize), options: MTLResourceOptions.StorageModeShared, deallocator: nil)
     }
@@ -134,7 +138,7 @@ class ParticleLab: MTKView
         setGravityWellProperties(gravityWell: .Four, normalisedPositionX: 0.75, normalisedPositionY: 0.75, mass: 10, spin: -0.2)
     }
     
-    func resetParticles(edgesOnly: Bool = false, distribution: Distribution = Distribution.Gaussian)
+    func resetParticles(edgesOnly: Bool = true, distribution: Distribution = Distribution.Gaussian)
     {
         func rand() -> Float32
         {
@@ -223,6 +227,15 @@ class ParticleLab: MTKView
         step()
     }
     
+    var textureOdd: MTLTexture!
+    
+    private func setUpTextures()
+    {
+        let descriptor = MTLTextureDescriptor.texture2DDescriptorWithPixelFormat(MTLPixelFormat.RGBA8Unorm, width: Int(imageWidth), height: Int(imageHeight), mipmapped: false)
+        
+        textureOdd = device!.newTextureWithDescriptor(descriptor)
+    }
+    
     private func setUpMetal()
     {
         device = MTLCreateSystemDefaultDevice()
@@ -260,6 +273,8 @@ class ParticleLab: MTKView
             imageWidthFloatBuffer =  device!.newBufferWithBytes(&imageWidthFloat, length: sizeof(Float), options: MTLResourceOptions.CPUCacheModeDefaultCache)
             
             imageHeightFloatBuffer = device!.newBufferWithBytes(&imageHeightFloat, length: sizeof(Float), options: MTLResourceOptions.CPUCacheModeDefaultCache)
+            
+            blur = MPSImageGaussianBlur(device: device!, sigma: 4)
             
             frameStartTime = CFAbsoluteTimeGetCurrent()
         }
@@ -299,19 +314,23 @@ class ParticleLab: MTKView
         commandEncoder.setBytes(&dragFactor, length: floatSize, atIndex: 6)
         commandEncoder.setBytes(&respawnOutOfBoundsParticles, length: boolSize, atIndex: 7)
         
-        if let drawable = currentDrawable
+        if let drawable = currentDrawable 
         {
             if clearOnStep
             {
-                drawable.texture.replaceRegion(self.region, mipmapLevel: 0, withBytes: blankBitmapRawData, bytesPerRow: bytesPerRow)
+                // drawable.texture.replaceRegion(self.region, mipmapLevel: 0, withBytes: blankBitmapRawData, bytesPerRow: bytesPerRow)
             }
             
-            commandEncoder.setTexture(drawable.texture, atIndex: 0)
+            commandEncoder.setTexture(textureOdd, atIndex: 0);
             
             commandEncoder.dispatchThreadgroups(threadgroupsPerGrid, threadsPerThreadgroup: threadsPerThreadgroup)
             
             commandEncoder.endEncoding()
 
+            blur.encodeToCommandBuffer(commandBuffer, sourceTexture: textureOdd, destinationTexture: drawable.texture)
+            
+            blur.encodeToCommandBuffer(commandBuffer, sourceTexture: drawable.texture, destinationTexture: textureOdd)
+            
             commandBuffer.presentDrawable(drawable)
             
             commandBuffer.commit()
@@ -321,15 +340,13 @@ class ParticleLab: MTKView
             commandEncoder.endEncoding()
             
             print("metalLayer.nextDrawable() returned nil")
-        }
+       }
         
         dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0))
         {
             particleLabDelegate?.particleLabDidUpdate()
         }
     }
-    
-
     
     final func getGravityWellNormalisedPosition(gravityWell gravityWell: GravityWell) -> (x: Float, y: Float)
     {

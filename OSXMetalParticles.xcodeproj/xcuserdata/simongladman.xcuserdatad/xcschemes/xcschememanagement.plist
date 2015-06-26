@@ -4,11 +4,6 @@
 <dict>
 	<key>SchemeUserState</key>
 	<dict>
-		<key>OSXMetalParticles.xcscheme</key>
-		<dict>
-			<key>orderHint</key>
-			<integer>0</integer>
-		</dict>
 		<key>iOSMetalParticles.xcscheme</key>
 		<dict>
 			<key>orderHint</key>
