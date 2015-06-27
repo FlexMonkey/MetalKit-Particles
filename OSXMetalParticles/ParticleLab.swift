@@ -276,11 +276,11 @@ class ParticleLab: MTKView
             
             let blur = MPSImageGaussianBlur(device: device!, sigma: 3)
             let sobel = MPSImageSobel(device: device!)
-            let dilate = MPSImageAreaMax(device: device!, kernelWidth: 3, kernelHeight: 3)
-            let erode = MPSImageAreaMin(device: device!, kernelWidth: 3, kernelHeight: 3)
+            let dilate = MPSImageAreaMax(device: device!, kernelWidth: 5, kernelHeight: 5)
+            let erode = MPSImageAreaMin(device: device!, kernelWidth: 5, kernelHeight: 5)
             let median = MPSImageMedian(device: device!, kernelDiameter: 3)
-            let box = MPSImageBox(device: device!, kernelWidth: 3, kernelHeight: 3)
-            let tent = MPSImageTent(device: device!, kernelWidth: 3, kernelHeight: 3)
+            let box = MPSImageBox(device: device!, kernelWidth: 9, kernelHeight: 9)
+            let tent = MPSImageTent(device: device!, kernelWidth: 9, kernelHeight: 9)
             
             filters = [blur, sobel, dilate, erode, median, box, tent]
             
