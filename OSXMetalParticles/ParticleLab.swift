@@ -33,7 +33,6 @@ class ParticleLab: MTKView
     
     let bytesPerRow: Int
     let region: MTLRegion
-    let blankBitmapRawData : [UInt8]
     
     private var kernelFunction: MTLFunction!
     private var pipelineState: MTLComputePipelineState!
@@ -66,10 +65,9 @@ class ParticleLab: MTKView
     
     weak var particleLabDelegate: ParticleLabDelegate?
     
-    var particleColor = ParticleColor(R: 1, G: 0.15, B: 0.15, A: 1)
+    var particleColor = ParticleColor(R: 1, G: 0.45, B: 0.65, A: 1)
     var dragFactor: Float = 0.97
     var respawnOutOfBoundsParticles = true
-    var clearOnStep = true
     
     private var frameStartTime: CFAbsoluteTime!
     private var frameNumber = 0
@@ -77,6 +75,14 @@ class ParticleLab: MTKView
     var particlesBufferNoCopy: MTLBuffer!
     
     var blur: MPSImageGaussianBlur!
+    var sobel: MPSImageSobel!
+    var dilate: MPSImageAreaMax!
+    var erode: MPSImageAreaMin!
+    var median: MPSImageMedian!
+    var box: MPSImageBox!
+    var tent: MPSImageTent!
+    
+    var filters: [MPSUnaryImageKernel]!
     
     init(width: UInt, height: UInt, numParticles: ParticleCount)
     {
@@ -88,7 +94,7 @@ class ParticleLab: MTKView
         bytesPerRow = Int(4 * imageWidth)
         
         region = MTLRegionMake2D(0, 0, Int(imageWidth), Int(imageHeight))
-        blankBitmapRawData = [UInt8](count: Int(imageWidth * imageHeight * 4), repeatedValue: 0)
+
         particlesMemoryByteSize = particleCount * sizeof(Particle)
         
         super.init(frame: CGRect(x: 0, y: 0, width: Int(width), height: Int(height)))
@@ -97,15 +103,17 @@ class ParticleLab: MTKView
         colorPixelFormat = MTLPixelFormat.BGRA8Unorm
         sampleCount = 1
         preferredFramesPerSecond = 60
-        
-        drawableSize = CGSize(width: CGFloat(imageWidth), height: CGFloat(imageHeight));
-       
+   
         setUpParticles()
         
         setUpMetal()
         setUpTextures()
         
         particlesBufferNoCopy = device!.newBufferWithBytesNoCopy(particlesMemory, length: Int(particlesMemoryByteSize), options: MTLResourceOptions.StorageModeShared, deallocator: nil)
+        
+        layer.shadowColor = UIColor.blackColor().CGColor
+        layer.shadowOffset = CGSize(width: 0, height: 0)
+        layer.shadowOpacity = 1
     }
     
     required init(coder aDecoder: NSCoder)
@@ -138,7 +146,7 @@ class ParticleLab: MTKView
         setGravityWellProperties(gravityWell: .Four, normalisedPositionX: 0.75, normalisedPositionY: 0.75, mass: 10, spin: -0.2)
     }
     
-    func resetParticles(edgesOnly: Bool = true, distribution: Distribution = Distribution.Gaussian)
+    func resetParticles(edgesOnly: Bool = false, distribution: Distribution = Distribution.Gaussian)
     {
         func rand() -> Float32
         {
@@ -156,8 +164,8 @@ class ParticleLab: MTKView
         switch distribution
         {
         case .Gaussian:
-            randomWidth = GKGaussianDistribution(randomSource: randomSource, lowestValue: 0, highestValue: Int(imageWidthDouble))
-            randomHeight = GKGaussianDistribution(randomSource: randomSource, lowestValue: 0, highestValue: Int(imageHeightDouble))
+            randomWidth = GKGaussianDistribution(randomSource: randomSource, lowestValue: 200, highestValue: Int(imageWidthDouble - 200))
+            randomHeight = GKGaussianDistribution(randomSource: randomSource, lowestValue: 200, highestValue: Int(imageHeightDouble - 200))
             
         case .Uniform:
             randomWidth = GKShuffledDistribution(randomSource: randomSource, lowestValue: 0, highestValue: Int(imageWidthDouble))
@@ -236,6 +244,8 @@ class ParticleLab: MTKView
         textureOdd = device!.newTextureWithDescriptor(descriptor)
     }
     
+    var filterIndexes: (one: Int, two: Int) = (0, 3)
+    
     private func setUpMetal()
     {
         device = MTLCreateSystemDefaultDevice()
@@ -274,7 +284,15 @@ class ParticleLab: MTKView
             
             imageHeightFloatBuffer = device!.newBufferWithBytes(&imageHeightFloat, length: sizeof(Float), options: MTLResourceOptions.CPUCacheModeDefaultCache)
             
-            blur = MPSImageGaussianBlur(device: device!, sigma: 4)
+            blur = MPSImageGaussianBlur(device: device!, sigma: 3)
+            sobel = MPSImageSobel(device: device!)
+            dilate = MPSImageAreaMax(device: device!, kernelWidth: 3, kernelHeight: 3)
+            erode = MPSImageAreaMin(device: device!, kernelWidth: 3, kernelHeight: 3)
+            median = MPSImageMedian(device: device!, kernelDiameter: 3)
+            box = MPSImageBox(device: device!, kernelWidth: 3, kernelHeight: 3)
+            tent = MPSImageTent(device: device!, kernelWidth: 3, kernelHeight: 3)
+            
+            filters = [blur, sobel, dilate, erode, median, box, tent]
             
             frameStartTime = CFAbsoluteTimeGetCurrent()
         }
@@ -316,20 +334,15 @@ class ParticleLab: MTKView
         
         if let drawable = currentDrawable 
         {
-            if clearOnStep
-            {
-                // drawable.texture.replaceRegion(self.region, mipmapLevel: 0, withBytes: blankBitmapRawData, bytesPerRow: bytesPerRow)
-            }
-            
             commandEncoder.setTexture(textureOdd, atIndex: 0);
             
             commandEncoder.dispatchThreadgroups(threadgroupsPerGrid, threadsPerThreadgroup: threadsPerThreadgroup)
             
             commandEncoder.endEncoding()
 
-            blur.encodeToCommandBuffer(commandBuffer, sourceTexture: textureOdd, destinationTexture: drawable.texture)
+            filters[filterIndexes.one].encodeToCommandBuffer(commandBuffer, sourceTexture: textureOdd, destinationTexture: drawable.texture)
             
-            blur.encodeToCommandBuffer(commandBuffer, sourceTexture: drawable.texture, destinationTexture: textureOdd)
+            filters[filterIndexes.two].encodeToCommandBuffer(commandBuffer, sourceTexture: drawable.texture, destinationTexture: textureOdd)
             
             commandBuffer.presentDrawable(drawable)
             

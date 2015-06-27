@@ -17,13 +17,19 @@ class ViewController: UIViewController, ParticleLabDelegate
     
     let fpsLabel = UILabel(frame: CGRect(x: 0, y: 20, width: 400, height: 20))
     
+    let imageSide = UInt(1024)
+    
+    let filterOneSegmentedControl = UISegmentedControl(items: ["gaussian", "sobel", "dilate", "erode", "median", "box", "tent"])
+    let filterTwoSegmentedControl = UISegmentedControl(items: ["gaussian", "sobel", "dilate", "erode", "median", "box", "tent"])
+
+    let segmentedControlsGroup = UIStackView()
+    
     override func viewDidLoad()
     {
         super.viewDidLoad()
         
-        particleLab = ParticleLab(width: UInt(view.frame.width * 2), height: UInt(view.frame.height * 2), numParticles: ParticleCount.FourMillion)
+        particleLab = ParticleLab(width: imageSide, height: imageSide, numParticles: ParticleCount.TwoMillion)
         
-        particleLab.clearOnStep = false
         particleLab.dragFactor = 0.85
         particleLab.respawnOutOfBoundsParticles = true
         particleLab.particleLabDelegate = self
@@ -32,6 +38,22 @@ class ViewController: UIViewController, ParticleLabDelegate
         
         fpsLabel.textColor = UIColor.whiteColor()
 //        view.addSubview(fpsLabel)
+        
+        segmentedControlsGroup.addArrangedSubview(filterOneSegmentedControl)
+        segmentedControlsGroup.addArrangedSubview(filterTwoSegmentedControl)
+        segmentedControlsGroup.distribution = UIStackViewDistribution.EqualSpacing
+        view.addSubview(segmentedControlsGroup)
+        
+        filterOneSegmentedControl.addTarget(self, action: "filterChangeHandler", forControlEvents: UIControlEvents.ValueChanged)
+        filterTwoSegmentedControl.addTarget(self, action: "filterChangeHandler", forControlEvents: UIControlEvents.ValueChanged)
+        
+        filterOneSegmentedControl.selectedSegmentIndex = particleLab.filterIndexes.one
+        filterTwoSegmentedControl.selectedSegmentIndex = particleLab.filterIndexes.two
+    }
+    
+    func filterChangeHandler()
+    {
+       particleLab.filterIndexes = (filterOneSegmentedControl.selectedSegmentIndex, filterTwoSegmentedControl.selectedSegmentIndex)
     }
     
     func particleLabMetalUnavailable()
@@ -80,10 +102,15 @@ class ViewController: UIViewController, ParticleLabDelegate
             mass: 26 * cos(gravityWellAngle / 1.5),
             spin: -19 * sin(gravityWellAngle * 1.5))
     }
-    
+ 
     override func viewDidLayoutSubviews()
     {
-        particleLab.frame = view.bounds
+        let qtrSide = CGFloat(imageSide / 4)
+        let halfSize = CGFloat(imageSide / 2)
+        
+        particleLab.frame = CGRect(x: view.frame.width / 2 - qtrSide, y: view.frame.height / 2 - qtrSide, width: halfSize, height: halfSize)
+        
+        segmentedControlsGroup.frame = CGRect(x: 10, y: view.frame.height - filterOneSegmentedControl.intrinsicContentSize().height - 10, width: view.frame.width - 20, height: filterOneSegmentedControl.intrinsicContentSize().height)
     }
     
 }

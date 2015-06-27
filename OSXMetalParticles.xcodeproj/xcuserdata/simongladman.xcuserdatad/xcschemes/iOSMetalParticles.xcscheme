@@ -14,7 +14,7 @@
             buildForAnalyzing = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "3E2B16F21B39CB9600DE1454"
+               BlueprintIdentifier = "3E26C2511B3B188E00DA28C4"
                BuildableName = "iOSMetalParticles.app"
                BlueprintName = "iOSMetalParticles"
                ReferencedContainer = "container:OSXMetalParticles.xcodeproj">
@@ -32,7 +32,7 @@
       <MacroExpansion>
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "3E2B16F21B39CB9600DE1454"
+            BlueprintIdentifier = "3E26C2511B3B188E00DA28C4"
             BuildableName = "iOSMetalParticles.app"
             BlueprintName = "iOSMetalParticles"
             ReferencedContainer = "container:OSXMetalParticles.xcodeproj">
@@ -55,7 +55,7 @@
          runnableDebuggingMode = "0">
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "3E2B16F21B39CB9600DE1454"
+            BlueprintIdentifier = "3E26C2511B3B188E00DA28C4"
             BuildableName = "iOSMetalParticles.app"
             BlueprintName = "iOSMetalParticles"
             ReferencedContainer = "container:OSXMetalParticles.xcodeproj">
@@ -74,7 +74,7 @@
          runnableDebuggingMode = "0">
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "3E2B16F21B39CB9600DE1454"
+            BlueprintIdentifier = "3E26C2511B3B188E00DA28C4"
             BuildableName = "iOSMetalParticles.app"
             BlueprintName = "iOSMetalParticles"
             ReferencedContainer = "container:OSXMetalParticles.xcodeproj">
