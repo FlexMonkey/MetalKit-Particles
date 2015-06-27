@@ -39,7 +39,8 @@ class ParticleLab: MTKView
     private var defaultLibrary: MTLLibrary! = nil
     private var commandQueue: MTLCommandQueue! = nil
     
-    private var errorFlag:Bool = false
+    var textureOdd: MTLTexture!
+    var filterIndexes: (one: Int, two: Int) = (0, 3)
     
     private var threadsPerThreadgroup:MTLSize!
     private var threadgroupsPerGrid:MTLSize!
@@ -225,8 +226,6 @@ class ParticleLab: MTKView
         step()
     }
     
-    var textureOdd: MTLTexture!
-    
     private func setUpTextures()
     {
         let descriptor = MTLTextureDescriptor.texture2DDescriptorWithPixelFormat(MTLPixelFormat.RGBA8Unorm, width: Int(imageWidth), height: Int(imageHeight), mipmapped: false)
@@ -234,58 +233,54 @@ class ParticleLab: MTKView
         textureOdd = device!.newTextureWithDescriptor(descriptor)
     }
     
-    var filterIndexes: (one: Int, two: Int) = (0, 3)
-    
     private func setUpMetal()
     {
-        device = MTLCreateSystemDefaultDevice()
-        
-        if device == nil
+        guard let device = MTLCreateSystemDefaultDevice() else
         {
-            errorFlag = true
-            
             particleLabDelegate?.particleLabMetalUnavailable()
+            
+            return
         }
-        else
+        
+        self.device = device
+        
+        defaultLibrary = device.newDefaultLibrary()
+        commandQueue = device.newCommandQueue()
+        
+        kernelFunction = defaultLibrary.newFunctionWithName("particleRendererShader")
+        
+        do
         {
-            defaultLibrary = device!.newDefaultLibrary()
-            commandQueue = device!.newCommandQueue()
-            
-            kernelFunction = defaultLibrary.newFunctionWithName("particleRendererShader")
-            
-            do
-            {
-                try pipelineState = device!.newComputePipelineStateWithFunction(kernelFunction!)
-            }
-            catch
-            {
-                fatalError("newComputePipelineStateWithFunction failed ")
-            }
-            
-            let threadExecutionWidth = pipelineState.threadExecutionWidth
-            
-            threadsPerThreadgroup = MTLSize(width:threadExecutionWidth,height:1,depth:1)
-            threadgroupsPerGrid = MTLSize(width:particleCount / threadExecutionWidth, height:1, depth:1)
-            
-            var imageWidthFloat = Float(imageWidth)
-            var imageHeightFloat = Float(imageHeight)
-            
-            imageWidthFloatBuffer =  device!.newBufferWithBytes(&imageWidthFloat, length: sizeof(Float), options: MTLResourceOptions.CPUCacheModeDefaultCache)
-            
-            imageHeightFloatBuffer = device!.newBufferWithBytes(&imageHeightFloat, length: sizeof(Float), options: MTLResourceOptions.CPUCacheModeDefaultCache)
-            
-            let blur = MPSImageGaussianBlur(device: device!, sigma: 3)
-            let sobel = MPSImageSobel(device: device!)
-            let dilate = MPSImageAreaMax(device: device!, kernelWidth: 5, kernelHeight: 5)
-            let erode = MPSImageAreaMin(device: device!, kernelWidth: 5, kernelHeight: 5)
-            let median = MPSImageMedian(device: device!, kernelDiameter: 3)
-            let box = MPSImageBox(device: device!, kernelWidth: 9, kernelHeight: 9)
-            let tent = MPSImageTent(device: device!, kernelWidth: 9, kernelHeight: 9)
-            
-            filters = [blur, sobel, dilate, erode, median, box, tent]
-            
-            frameStartTime = CFAbsoluteTimeGetCurrent()
+            try pipelineState = device.newComputePipelineStateWithFunction(kernelFunction!)
         }
+        catch
+        {
+            fatalError("newComputePipelineStateWithFunction failed ")
+        }
+        
+        let threadExecutionWidth = pipelineState.threadExecutionWidth
+        
+        threadsPerThreadgroup = MTLSize(width:threadExecutionWidth,height:1,depth:1)
+        threadgroupsPerGrid = MTLSize(width:particleCount / threadExecutionWidth, height:1, depth:1)
+        
+        var imageWidthFloat = Float(imageWidth)
+        var imageHeightFloat = Float(imageHeight)
+        
+        imageWidthFloatBuffer =  device.newBufferWithBytes(&imageWidthFloat, length: sizeof(Float), options: MTLResourceOptions.CPUCacheModeDefaultCache)
+        
+        imageHeightFloatBuffer = device.newBufferWithBytes(&imageHeightFloat, length: sizeof(Float), options: MTLResourceOptions.CPUCacheModeDefaultCache)
+        
+        let blur = MPSImageGaussianBlur(device: device, sigma: 3)
+        let sobel = MPSImageSobel(device: device)
+        let dilate = MPSImageAreaMax(device: device, kernelWidth: 5, kernelHeight: 5)
+        let erode = MPSImageAreaMin(device: device, kernelWidth: 5, kernelHeight: 5)
+        let median = MPSImageMedian(device: device, kernelDiameter: 3)
+        let box = MPSImageBox(device: device, kernelWidth: 9, kernelHeight: 9)
+        let tent = MPSImageTent(device: device, kernelWidth: 9, kernelHeight: 9)
+        
+        filters = [blur, sobel, dilate, erode, median, box, tent]
+        
+        frameStartTime = CFAbsoluteTimeGetCurrent()
     }
     
     final private func step()
@@ -322,29 +317,29 @@ class ParticleLab: MTKView
         commandEncoder.setBytes(&dragFactor, length: floatSize, atIndex: 6)
         commandEncoder.setBytes(&respawnOutOfBoundsParticles, length: boolSize, atIndex: 7)
         
-        if let drawable = currentDrawable 
-        {
-            commandEncoder.setTexture(textureOdd, atIndex: 0);
-            
-            commandEncoder.dispatchThreadgroups(threadgroupsPerGrid, threadsPerThreadgroup: threadsPerThreadgroup)
-            
-            commandEncoder.endEncoding()
-
-            filters[filterIndexes.one].encodeToCommandBuffer(commandBuffer, sourceTexture: textureOdd, destinationTexture: drawable.texture)
-            
-            filters[filterIndexes.two].encodeToCommandBuffer(commandBuffer, sourceTexture: drawable.texture, destinationTexture: textureOdd)
-            
-            commandBuffer.presentDrawable(drawable)
-            
-            commandBuffer.commit()
-        }
-        else
+        guard let drawable = currentDrawable else
         {
             commandEncoder.endEncoding()
             
             print("metalLayer.nextDrawable() returned nil")
-       }
+            
+            return
+        }
         
+        commandEncoder.setTexture(textureOdd, atIndex: 0);
+        
+        commandEncoder.dispatchThreadgroups(threadgroupsPerGrid, threadsPerThreadgroup: threadsPerThreadgroup)
+        
+        commandEncoder.endEncoding()
+
+        filters[filterIndexes.one].encodeToCommandBuffer(commandBuffer, sourceTexture: textureOdd, destinationTexture: drawable.texture)
+        
+        filters[filterIndexes.two].encodeToCommandBuffer(commandBuffer, sourceTexture: drawable.texture, destinationTexture: textureOdd)
+        
+        commandBuffer.presentDrawable(drawable)
+        
+        commandBuffer.commit()
+
         dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0))
         {
             particleLabDelegate?.particleLabDidUpdate()
