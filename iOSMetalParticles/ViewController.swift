@@ -36,8 +36,8 @@ class ViewController: UIViewController, ParticleLabDelegate
         
         view.addSubview(particleLab)
         
-        fpsLabel.textColor = UIColor.whiteColor()
-//        view.addSubview(fpsLabel)
+        fpsLabel.textColor = UIColor.blueColor()
+        view.addSubview(fpsLabel)
         
         segmentedControlsGroup.addArrangedSubview(filterOneSegmentedControl)
         segmentedControlsGroup.addArrangedSubview(filterTwoSegmentedControl)
@@ -63,10 +63,10 @@ class ViewController: UIViewController, ParticleLabDelegate
     
     func particleLabStatisticsDidUpdate(fps fps: Int, description: String)
     {
-//        dispatch_async(dispatch_get_main_queue())
-//        {
-//            self.fpsLabel.text = description
-//        }
+        dispatch_async(dispatch_get_main_queue())
+        {
+            self.fpsLabel.text = description
+        }
     }
     
     func particleLabDidUpdate()
@@ -94,13 +94,13 @@ class ViewController: UIViewController, ParticleLabDelegate
             normalisedPositionX: 0.5 + (0.35 + sin(gravityWellAngle * 2.7)) * cos(gravityWellAngle / 1.3),
             normalisedPositionY: 0.5 + (0.35 + sin(gravityWellAngle * 2.7)) * sin(gravityWellAngle / 1.3),
             mass: 26 * cos(gravityWellAngle / 1.5),
-            spin: -19 * sin(gravityWellAngle * 1.5))
+            spin: -19 * sin(gravityWellAngle * 1.75))
         
         particleLab.setGravityWellProperties(gravityWell: .Three,
             normalisedPositionX: 0.5 + (0.35 + sin(gravityWellAngle * 2.7)) * cos(gravityWellAngle / 1.3 + floatPi),
             normalisedPositionY: 0.5 + (0.35 + sin(gravityWellAngle * 2.7)) * sin(gravityWellAngle / 1.3 + floatPi),
             mass: 26 * cos(gravityWellAngle / 1.5),
-            spin: -19 * sin(gravityWellAngle * 1.5))
+            spin: -19 * sin(gravityWellAngle * 1.57))
     }
  
     override func viewDidLayoutSubviews()
@@ -109,6 +109,8 @@ class ViewController: UIViewController, ParticleLabDelegate
         let halfSize = CGFloat(imageSide / 2)
         
         particleLab.frame = CGRect(x: view.frame.width / 2 - qtrSide, y: view.frame.height / 2 - qtrSide, width: halfSize, height: halfSize)
+        
+        fpsLabel.frame =  CGRect(x: 10, y: topLayoutGuide.length, width: 400, height: 20)
         
         segmentedControlsGroup.frame = CGRect(x: 10, y: view.frame.height - filterOneSegmentedControl.intrinsicContentSize().height - 10, width: view.frame.width - 20, height: filterOneSegmentedControl.intrinsicContentSize().height)
     }

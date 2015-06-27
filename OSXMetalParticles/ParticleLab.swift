@@ -73,15 +73,7 @@ class ParticleLab: MTKView
     private var frameNumber = 0
     
     var particlesBufferNoCopy: MTLBuffer!
-    
-    var blur: MPSImageGaussianBlur!
-    var sobel: MPSImageSobel!
-    var dilate: MPSImageAreaMax!
-    var erode: MPSImageAreaMin!
-    var median: MPSImageMedian!
-    var box: MPSImageBox!
-    var tent: MPSImageTent!
-    
+   
     var filters: [MPSUnaryImageKernel]!
     
     init(width: UInt, height: UInt, numParticles: ParticleCount)
@@ -101,11 +93,9 @@ class ParticleLab: MTKView
         
         framebufferOnly = false
         colorPixelFormat = MTLPixelFormat.BGRA8Unorm
-        sampleCount = 1
         preferredFramesPerSecond = 60
    
         setUpParticles()
-        
         setUpMetal()
         setUpTextures()
         
@@ -284,13 +274,13 @@ class ParticleLab: MTKView
             
             imageHeightFloatBuffer = device!.newBufferWithBytes(&imageHeightFloat, length: sizeof(Float), options: MTLResourceOptions.CPUCacheModeDefaultCache)
             
-            blur = MPSImageGaussianBlur(device: device!, sigma: 3)
-            sobel = MPSImageSobel(device: device!)
-            dilate = MPSImageAreaMax(device: device!, kernelWidth: 3, kernelHeight: 3)
-            erode = MPSImageAreaMin(device: device!, kernelWidth: 3, kernelHeight: 3)
-            median = MPSImageMedian(device: device!, kernelDiameter: 3)
-            box = MPSImageBox(device: device!, kernelWidth: 3, kernelHeight: 3)
-            tent = MPSImageTent(device: device!, kernelWidth: 3, kernelHeight: 3)
+            let blur = MPSImageGaussianBlur(device: device!, sigma: 3)
+            let sobel = MPSImageSobel(device: device!)
+            let dilate = MPSImageAreaMax(device: device!, kernelWidth: 3, kernelHeight: 3)
+            let erode = MPSImageAreaMin(device: device!, kernelWidth: 3, kernelHeight: 3)
+            let median = MPSImageMedian(device: device!, kernelDiameter: 3)
+            let box = MPSImageBox(device: device!, kernelWidth: 3, kernelHeight: 3)
+            let tent = MPSImageTent(device: device!, kernelWidth: 3, kernelHeight: 3)
             
             filters = [blur, sobel, dilate, erode, median, box, tent]
             
