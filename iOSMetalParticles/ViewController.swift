@@ -93,22 +93,22 @@ class ViewController: UIViewController, ParticleLabDelegate
         particleLab.setGravityWellProperties(gravityWell: .Two,
             normalisedPositionX: 0.5 + (0.35 + sin(gravityWellAngle * 2.7)) * cos(gravityWellAngle / 1.3),
             normalisedPositionY: 0.5 + (0.35 + sin(gravityWellAngle * 2.7)) * sin(gravityWellAngle / 1.3),
-            mass: 26 * cos(gravityWellAngle / 1.5),
-            spin: -19 * sin(gravityWellAngle * 1.75))
+            mass: 22 * cos(gravityWellAngle / 1.5),
+            spin: -29 * sin(gravityWellAngle * 1.75))
         
         particleLab.setGravityWellProperties(gravityWell: .Three,
             normalisedPositionX: 0.5 + (0.35 + sin(gravityWellAngle * 2.7)) * cos(gravityWellAngle / 1.3 + floatPi),
             normalisedPositionY: 0.5 + (0.35 + sin(gravityWellAngle * 2.7)) * sin(gravityWellAngle / 1.3 + floatPi),
-            mass: 26 * cos(gravityWellAngle / 1.5),
-            spin: -19 * sin(gravityWellAngle * 1.57))
+            mass: 22 * cos(gravityWellAngle / 1.5),
+            spin: -29 * sin(gravityWellAngle * 1.75))
     }
  
     override func viewDidLayoutSubviews()
     {
         let qtrSide = CGFloat(imageSide / 4)
-        let halfSize = CGFloat(imageSide / 2)
+        let halfSide = CGFloat(imageSide / 2)
         
-        particleLab.frame = CGRect(x: view.frame.width / 2 - qtrSide, y: view.frame.height / 2 - qtrSide, width: halfSize, height: halfSize)
+        particleLab.frame = CGRect(x: view.frame.width / 2 - qtrSide, y: view.frame.height / 2 - qtrSide, width: halfSide, height: halfSide)
         
         fpsLabel.frame =  CGRect(x: 10, y: topLayoutGuide.length, width: 400, height: 20)
         
