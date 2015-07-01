@@ -328,6 +328,7 @@
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				MACOSX_DEPLOYMENT_TARGET = 10.11;
 				MTL_ENABLE_DEBUG_INFO = YES;
+				MTL_FAST_MATH = YES;
 				MTL_OPTIMIZATION_LEVEL = 3;
 				ONLY_ACTIVE_ARCH = YES;
 				SDKROOT = macosx;
@@ -367,6 +368,7 @@
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				MACOSX_DEPLOYMENT_TARGET = 10.11;
 				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
 				MTL_OPTIMIZATION_LEVEL = 3;
 				SDKROOT = macosx;
 			};
@@ -379,6 +381,8 @@
 				COMBINE_HIDPI_IMAGES = YES;
 				INFOPLIST_FILE = OSXMetalParticles/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
+				MTL_FAST_MATH = YES;
+				MTL_OPTIMIZATION_LEVEL = 3;
 				PRODUCT_BUNDLE_IDENTIFIER = uk.co.flexmonkey.OSXMetalParticles;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_OBJC_BRIDGING_HEADER = "";
@@ -392,6 +396,8 @@
 				COMBINE_HIDPI_IMAGES = YES;
 				INFOPLIST_FILE = OSXMetalParticles/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
+				MTL_FAST_MATH = YES;
+				MTL_OPTIMIZATION_LEVEL = 3;
 				PRODUCT_BUNDLE_IDENTIFIER = uk.co.flexmonkey.OSXMetalParticles;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_OBJC_BRIDGING_HEADER = "";
@@ -408,6 +414,7 @@
 				3E26C2631B3B188E00DA28C4 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 		3EE448CC1B2B857E003F8471 /* Build configuration list for PBXProject "OSXMetalParticles" */ = {
 			isa = XCConfigurationList;

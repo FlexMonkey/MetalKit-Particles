@@ -227,42 +227,44 @@ class ParticleLab: MTKView
     {
         device = MTLCreateSystemDefaultDevice()
         
-        if device == nil
+        guard let device = MTLCreateSystemDefaultDevice() else
         {
             errorFlag = true
             
             particleLabDelegate?.particleLabMetalUnavailable()
+            
+            return
         }
-        else
+  
+        self.device = device
+        
+        defaultLibrary = device.newDefaultLibrary()
+        commandQueue = device.newCommandQueue()
+        
+        kernelFunction = defaultLibrary.newFunctionWithName("particleRendererShader")
+        
+        do
         {
-            defaultLibrary = device!.newDefaultLibrary()
-            commandQueue = device!.newCommandQueue()
-            
-            kernelFunction = defaultLibrary.newFunctionWithName("particleRendererShader")
-            
-            do
-            {
-                try pipelineState = device!.newComputePipelineStateWithFunction(kernelFunction!)
-            }
-            catch
-            {
-                fatalError("newComputePipelineStateWithFunction failed ")
-            }
-            
-            let threadExecutionWidth = pipelineState.threadExecutionWidth
-            
-            threadsPerThreadgroup = MTLSize(width:threadExecutionWidth,height:1,depth:1)
-            threadgroupsPerGrid = MTLSize(width:particleCount / threadExecutionWidth, height:1, depth:1)
-            
-            var imageWidthFloat = Float(imageWidth)
-            var imageHeightFloat = Float(imageHeight)
-            
-            imageWidthFloatBuffer =  device!.newBufferWithBytes(&imageWidthFloat, length: sizeof(Float), options: MTLResourceOptions.CPUCacheModeDefaultCache)
-            
-            imageHeightFloatBuffer = device!.newBufferWithBytes(&imageHeightFloat, length: sizeof(Float), options: MTLResourceOptions.CPUCacheModeDefaultCache)
-            
-            frameStartTime = CFAbsoluteTimeGetCurrent()
+            try pipelineState = device.newComputePipelineStateWithFunction(kernelFunction!)
         }
+        catch
+        {
+            fatalError("newComputePipelineStateWithFunction failed ")
+        }
+        
+        let threadExecutionWidth = pipelineState.threadExecutionWidth
+        
+        threadsPerThreadgroup = MTLSize(width:threadExecutionWidth,height:1,depth:1)
+        threadgroupsPerGrid = MTLSize(width:particleCount / threadExecutionWidth, height:1, depth:1)
+        
+        var imageWidthFloat = Float(imageWidth)
+        var imageHeightFloat = Float(imageHeight)
+        
+        imageWidthFloatBuffer =  device.newBufferWithBytes(&imageWidthFloat, length: sizeof(Float), options: MTLResourceOptions.CPUCacheModeDefaultCache)
+        
+        imageHeightFloatBuffer = device.newBufferWithBytes(&imageHeightFloat, length: sizeof(Float), options: MTLResourceOptions.CPUCacheModeDefaultCache)
+        
+        frameStartTime = CFAbsoluteTimeGetCurrent()
     }
     
     final private func step()
@@ -299,29 +301,27 @@ class ParticleLab: MTKView
         commandEncoder.setBytes(&dragFactor, length: floatSize, atIndex: 6)
         commandEncoder.setBytes(&respawnOutOfBoundsParticles, length: boolSize, atIndex: 7)
         
-        if let drawable = currentDrawable
+        guard let drawable = currentDrawable else
         {
-            if clearOnStep
-            {
-                drawable.texture.replaceRegion(self.region, mipmapLevel: 0, withBytes: blankBitmapRawData, bytesPerRow: bytesPerRow)
-            }
+            print("currentDrawable returned nil")
             
-            commandEncoder.setTexture(drawable.texture, atIndex: 0)
-            
-            commandEncoder.dispatchThreadgroups(threadgroupsPerGrid, threadsPerThreadgroup: threadsPerThreadgroup)
-            
-            commandEncoder.endEncoding()
+            return
+        }
+        
+        if clearOnStep
+        {
+            drawable.texture.replaceRegion(self.region, mipmapLevel: 0, withBytes: blankBitmapRawData, bytesPerRow: bytesPerRow)
+        }
+        
+        commandEncoder.setTexture(drawable.texture, atIndex: 0)
+        
+        commandEncoder.dispatchThreadgroups(threadgroupsPerGrid, threadsPerThreadgroup: threadsPerThreadgroup)
+        
+        commandEncoder.endEncoding()
 
-            commandBuffer.presentDrawable(drawable)
-            
-            commandBuffer.commit()
-        }
-        else
-        {
-            commandEncoder.endEncoding()
-            
-            print("metalLayer.nextDrawable() returned nil")
-        }
+        commandBuffer.presentDrawable(drawable)
+        
+        commandBuffer.commit()
         
         dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0))
         {

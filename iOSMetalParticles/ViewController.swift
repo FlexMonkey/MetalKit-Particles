@@ -15,7 +15,7 @@ class ViewController: UIViewController, ParticleLabDelegate
     var particleLab: ParticleLab!
     let floatPi = Float(M_PI)
     
-    let fpsLabel = UILabel(frame: CGRect(x: 0, y: 0, width: 200, height: 20))
+    let fpsLabel = UILabel(frame: CGRect(x: 0, y: 0, width: 400, height: 20))
     
     override func viewDidLoad()
     {
