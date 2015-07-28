@@ -88,7 +88,7 @@ class ParticleLab: MTKView
         blankBitmapRawData = [UInt8](count: Int(imageWidth * imageHeight * 4), repeatedValue: 0)
         particlesMemoryByteSize = particleCount * sizeof(Particle)
         
-        super.init(frame: CGRect(x: 0, y: 0, width: Int(width), height: Int(height)))
+        super.init(frame: CGRect(x: 0, y: 0, width: Int(width), height: Int(height)), device:  MTLCreateSystemDefaultDevice())
         
         framebufferOnly = false
         colorPixelFormat = MTLPixelFormat.BGRA8Unorm
@@ -225,8 +225,6 @@ class ParticleLab: MTKView
     
     private func setUpMetal()
     {
-        device = MTLCreateSystemDefaultDevice()
-        
         guard let device = MTLCreateSystemDefaultDevice() else
         {
             errorFlag = true
@@ -236,8 +234,6 @@ class ParticleLab: MTKView
             return
         }
   
-        self.device = device
-        
         defaultLibrary = device.newDefaultLibrary()
         commandQueue = device.newCommandQueue()
         
