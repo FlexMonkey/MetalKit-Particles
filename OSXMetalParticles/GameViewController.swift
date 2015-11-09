@@ -26,6 +26,7 @@ class GameViewController : NSViewController, ParticleLabDelegate
         particleLab.dragFactor = 0.85
         particleLab.respawnOutOfBoundsParticles = true
         particleLab.particleLabDelegate = self
+        particleLab.clearOnStep = true
         
         view.addSubview(particleLab)
         
